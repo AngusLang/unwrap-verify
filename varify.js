@@ -3,9 +3,13 @@ attribute float quality;
 
 varying float vQuality;
 
+uniform vec3 scale;
+uniform float transform;
+
 void main()
 {
-  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+  vec3 uvPosition = scale * vec3(uv - 0.5, mix(0.0, position.z, transform));
+  vec4 mvPosition = modelViewMatrix * vec4(mix(uvPosition, position, transform), 1.0);
   vQuality = quality;
   gl_Position = projectionMatrix * mvPosition;
 }
@@ -23,7 +27,9 @@ void main()
 `;
 
 const uniforms = {
-  colorMap: {value: null}
+  colorMap: {value: null},
+  scale: {value: new THREE.Vector3(1, 1, 1)},
+  transform: {value: 0.0}
 };
 
 const material = new THREE.ShaderMaterial({
@@ -117,6 +123,10 @@ function varify(object) {
     quality[i] = (quality[i] - min_density) / range;
   }
 
+  geometry.computeBoundingBox();
+  var box = geometry.boundingBox;
+  box.getSize(uniforms.scale.value);
+
   geometry.addAttribute('quality', new THREE.BufferAttribute(quality, 1, false));
 
   object.material = material;
@@ -127,3 +137,21 @@ function setColorMap(name) {
   material.uniforms.colorMap.value = texture;
   material.needsUpdate = true;
 }
+
+var transform = document.getElementById('transform');
+var onchange = function (event) {
+  uniforms.transform.value = this.value;
+}.bind(transform);
+
+transform.addEventListener('mousedown', function() {
+  if (control) {
+    control.enabled = false;
+  }
+  window.addEventListener('mousemove', onchange, false);
+  window.addEventListener('mouseup', function() {
+    window.removeEventListener('mousemove', onchange);
+    if (control) {
+      control.enabled = true;
+    }
+  }, false);
+}, false);

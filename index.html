@@ -26,10 +26,20 @@ html, body, canvas {
   text-align: center;
   color: #a1a3a5;
 }
+#transform {
+  width: 100px;
+  height: 30px;
+  bottom: 10px;
+  left: 10px;
+  position: fixed;
+}
 </style>
 <body>
   <h5 id="hint">Drop File On Canvas [OBJ]</h5>
   <canvas id="canvas"></canvas>
+  <div id="transform-container">
+    <input type="range" id="transform" min="0" max="1" step="0.0001" value="0">
+  </div>
 </body>
 <script src="common.js"></script>
 <script src="ondrop.js"></script>
